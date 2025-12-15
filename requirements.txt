@@ -6,3 +6,5 @@
 transformers==4.57.3
 huggingface-hub==0.36.0
 hf-xet==1.2.0
+fastapi==0.124.4
+uvicorn==0.38.0

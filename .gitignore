@@ -43,9 +43,8 @@ env/
 .DS_Store
 Thumbs.db
 
-# ML/Model files (ОЧЕНЬ ВАЖНО!)
-models/
-!models/.gitkeep  # если хотите сохранить пустую папку
+# ML/Model files
+/models
 
 # Hugging Face
 .huggingface/
@@ -70,7 +69,7 @@ logs/
 # Тестовые данные
 test_data/
 
-# Конфигурационные файлы с чувствительными данными
+# Конфигурационные файлы
 config_local.yaml
 config_private.py
 

@@ -17,14 +17,14 @@ def _cached_predict(text: str):
 
 
 @app.post("/classify")
-async def classify_text(input_text: str):
-    text = input_text.strip().lower()
-    if text == "" or len(text) > 1000:
+async def classify_text(text: str):
+    proc_text = text.strip().lower()
+    if proc_text == "" or len(text) > 1000:
         raise HTTPException(400, "Текст должен быть от 1 до 1000 символов")
     
     # Detect cache hit using lru_cache stats diff
     hits_before = _cached_predict.cache_info().hits
-    result = _cached_predict(text)
+    result = _cached_predict(proc_text)
     hits_after = _cached_predict.cache_info().hits
     from_cache = hits_after > hits_before
 
@@ -34,7 +34,7 @@ async def classify_text(input_text: str):
 
 
     answer = {
-        "text": input_text,
+        "text": text,
         "emotion": result["label"],
         "confidence": result["score"],
         "from_cache": from_cache

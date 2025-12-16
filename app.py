@@ -1,7 +1,6 @@
 from fastapi import FastAPI, HTTPException
-# from functools import lru_cache
+from functools import lru_cache
 import logging
-from pydantic import BaseModel
 
 from classifier import EmotionClassifier
 
@@ -11,15 +10,23 @@ classifier = EmotionClassifier()
 logger = logging.getLogger(__name__)
 
 
+@lru_cache(maxsize=1024)
+def _cached_predict(text: str):
+    """Cache classifier results to avoid recomputation."""
+    return classifier.predict(text)
+
+
 @app.post("/classify")
-async def classify_text(text: str):
-    text = text.strip()
-    if not text or len(text) > 1000:
+async def classify_text(input_text: str):
+    text = input_text.strip().lower()
+    if text == "" or len(text) > 1000:
         raise HTTPException(400, "Текст должен быть от 1 до 1000 символов")
     
-    from_cache = False   
-    
-    result = classifier.predict(text)
+    # Detect cache hit using lru_cache stats diff
+    hits_before = _cached_predict.cache_info().hits
+    result = _cached_predict(text)
+    hits_after = _cached_predict.cache_info().hits
+    from_cache = hits_after > hits_before
 
     if "error" in result:
         logger.error(f"Ошибка классификации: {result['error']}")
@@ -27,7 +34,7 @@ async def classify_text(text: str):
 
 
     answer = {
-        "text": text,
+        "text": input_text,
         "emotion": result["label"],
         "confidence": result["score"],
         "from_cache": from_cache
@@ -40,7 +47,7 @@ async def classify_text(text: str):
 @app.get("/classify")
 async def classify_via_get(text: str):
     """Для быстрых тестов через браузер: /classify?text=Привет"""
-    return await classify_text(text=text)
+    return await classify_text(text)
 
 
 @app.get("/health")

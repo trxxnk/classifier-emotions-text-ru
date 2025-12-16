@@ -1,7 +1,14 @@
-import torch
-from transformers import pipeline
 from huggingface_hub import InferenceClient
 from config import config
+
+try:
+    import torch
+    from transformers import pipeline
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
+    torch = None
+    pipeline = None
 
 
 class EmotionClassifier:
@@ -9,6 +16,9 @@ class EmotionClassifier:
         self.mode = mode
         
         if self.mode == "local":
+            if not TORCH_AVAILABLE:
+                raise RuntimeError("PyTorch не установлен. Пожалуйста, установите PyTorch.")
+                
             self.classifier = pipeline(
                 "text-classification",
                 model=config.model_path,

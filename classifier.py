@@ -3,6 +3,7 @@ from transformers import pipeline
 from huggingface_hub import InferenceClient
 from config import config
 
+
 class EmotionClassifier:
     def __init__(self, mode:['api', 'local'] = 'api'):
         self.mode = mode

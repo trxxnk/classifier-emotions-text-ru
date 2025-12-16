@@ -30,7 +30,6 @@ async def classify_text(text: str):
 
     logger.info("Получен запрос на классификацию: %r", text)
     
-    # Detect cache hit using lru_cache stats diff
     hits_before = _cached_predict.cache_info().hits
     result = _cached_predict(proc_text)
     hits_after = _cached_predict.cache_info().hits

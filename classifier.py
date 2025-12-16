@@ -17,7 +17,6 @@ class EmotionClassifier:
             
         elif self.mode == "api":
             token = config.hf_api_token
-            print(f"{token=}")
             if token:
                 self.client = InferenceClient(
                     model=config.model_name,

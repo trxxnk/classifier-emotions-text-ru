@@ -35,8 +35,14 @@ def main():
         try:
             result = classify(args.endpoint, text)
             print(json.dumps(result, ensure_ascii=False, indent=2))
+        except requests.Timeout:
+            print("Таймаут: сервер не ответил вовремя.")
+        except requests.ConnectionError:
+            print("Ошибка сети: не удалось подключиться к серверу.")
         except requests.HTTPError as http_err:
             print(f"HTTP ошибка: {http_err} / ответ: {http_err.response.text}")
+        except ValueError:
+            print("Ошибка формата ответа: не удалось разобрать JSON.")
         except Exception as exc:
             print(f"Ошибка запроса: {exc}")
 

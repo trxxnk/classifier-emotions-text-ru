@@ -5,6 +5,12 @@ import logging
 from classifier import EmotionClassifier
 
 
+# Базовая настройка логгирования в консоль
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] app.py: %(message)s",
+)
+
 app = FastAPI(title="Emotion Classifier API")
 classifier = EmotionClassifier()
 logger = logging.getLogger(__name__)
@@ -21,6 +27,8 @@ async def classify_text(text: str):
     proc_text = text.strip().lower()
     if proc_text == "" or len(text) > 1000:
         raise HTTPException(400, "Текст должен быть от 1 до 1000 символов")
+
+    logger.info("Получен запрос на классификацию: %r", text)
     
     # Detect cache hit using lru_cache stats diff
     hits_before = _cached_predict.cache_info().hits
@@ -39,6 +47,13 @@ async def classify_text(text: str):
         "confidence": result["score"],
         "from_cache": from_cache
     }
+
+    logger.info(
+        "Результат классификации: emotion=%s, confidence=%.4f, from_cache=%s",
+        answer["emotion"],
+        answer["confidence"],
+        answer["from_cache"],
+    )
 
     return answer
 
@@ -59,4 +74,9 @@ async def health_check():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=8000,
+        access_log=False
+    )
